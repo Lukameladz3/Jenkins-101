@@ -1,0 +1,45 @@
+// Runs Playwright tests inside the official Playwright Docker image
+// (Node, browsers and all Linux dependencies are already installed).
+// Requirements: a Linux agent with Docker, and the "Docker Pipeline" plugin.
+// Keep the image tag in sync with the @playwright/test version in package.json.
+
+pipeline {
+    agent {
+        docker {
+            image 'mcr.microsoft.com/playwright:v1.65.1-noble'
+            args '--ipc=host'
+        }
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    environment {
+        CI = 'true'
+        // npm needs a writable cache folder inside the container
+        npm_config_cache = "${WORKSPACE}/.npm"
+    }
+
+    stages {
+        stage('Install dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Run tests') {
+            steps {
+                sh 'npx playwright test'
+            }
+        }
+    }
+
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
+            archiveArtifacts artifacts: 'playwright-report/**, test-results/**', allowEmptyArchive: true
+        }
+    }
+}
