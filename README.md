@@ -7,7 +7,7 @@ tests/
   playwright-dev.spec.ts   # checks playwright.dev (title, navigation)
   todo.spec.ts             # adds and completes items in the TodoMVC demo app
 playwright.config.ts       # reporters: console + JUnit XML (for Jenkins) + HTML
-Jenkinsfile                # runs on any agent that has Node.js (Linux or Windows)
+Jenkinsfile                # runs on a Windows node that has Node.js (uses bat)
 Jenkinsfile.docker         # runs inside the official Playwright Docker image
 ```
 
@@ -70,6 +70,8 @@ Open **Manage Jenkins → Plugins → Available plugins** and check that these a
    - **Branch Specifier:** `*/main`
    - **Script Path:** `Jenkinsfile` for Option A, or `Jenkinsfile.docker` for Option B
 5. Click **Save**.
+
+**Alternative: paste the pipeline into Jenkins.** Set **Definition** to `Pipeline script` and paste the `pipeline { ... }` block from `Jenkinsfile`. The pipeline clones the repo in its *Checkout* stage, so the code must already be pushed to GitHub.
 
 ---
 
